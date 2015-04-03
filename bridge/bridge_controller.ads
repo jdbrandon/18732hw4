@@ -36,8 +36,10 @@ Cross_Counter : Natural;
 function Valid return Boolean is
 (
   -- Write the condition for a valid state here.
-  ((Light_A = GREEN xor Light_B = GREEN) or (Light_A = RED and Light_B = RED)) and
-  true
+  
+  --both lights cannot be green
+  ((Light_A = GREEN xor Light_B = GREEN) or (Light_A = RED and Light_B = RED)) 
+  
 );
 
 procedure Init;
@@ -51,7 +53,9 @@ procedure Increment_W_B;
 
 procedure Simple_Case;
 
-procedure Cross;
+procedure Cross
+with Post =>
+  W_A = (W_A'Old - 1) xor W_B = (W_B'Old - 1);
 
 procedure Switch_Lights
 with Post => 

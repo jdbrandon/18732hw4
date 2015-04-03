@@ -50,7 +50,12 @@ with Post =>
   W_B = 0;
 
 procedure Tick
-(Next : Next_Car);
+(Next : Next_Car)
+with Post =>
+  (W_A > 0 and W_B = 0 and Light_A = GREEN) or
+  (W_B > 0 and W_A = 0 and Light_B = GREEN) or
+  (W_B > 0 and W_A > 0) or
+  (W_A = 0 and W_B = 0);
 
 procedure Increment_W_A;
 

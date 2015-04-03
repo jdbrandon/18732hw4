@@ -89,6 +89,8 @@ with Pre =>
       Cross_Counter /= Natural'Last,
      Post =>  (Cross_Counter = Cross_Counter'Old + 1);
 
-procedure Reset_Cross_Counter;
+procedure Reset_Cross_Counter
+with Post =>
+      Cross_Counter = 0;
 
 end Bridge_Controller;

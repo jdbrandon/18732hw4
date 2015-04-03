@@ -36,6 +36,7 @@ Cross_Counter : Natural;
 function Valid return Boolean is
 (
   -- Write the condition for a valid state here.
+  ((Light_A = GREEN xor Light_B = GREEN) or (Light_A = RED and Light_B = RED)) and
   true
 );
 

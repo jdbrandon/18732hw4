@@ -54,7 +54,8 @@ procedure Tick
 with Post =>
   (W_A > 0 and W_B = 0 and Light_A = GREEN) or
   (W_B > 0 and W_A = 0 and Light_B = GREEN) or
-  (W_B > 0 and W_A > 0) or
+  (W_B > 0 and W_A > 0 and Light_A'Old = RED and Light_B'Old = RED and Light_A = GREEN) or
+  (W_B > 0 and W_A > 0 and Light_A'Old /= Light_B'Old) or
   (W_A = 0 and W_B = 0);
 
 procedure Increment_W_A
@@ -70,7 +71,9 @@ procedure Cross
 with Pre => 
       (W_A /= 0) or (W_B /= 0),
      Post =>
-      (W_A = (W_A'Old - 1)) xor (W_B = (W_B'Old - 1)) ;
+      ((W_A = (W_A'Old - 1)) xor (W_B = (W_B'Old - 1))) and
+      (Cross_Counter = Cross_Counter'Old + 1) and
+      (Cross_Counter <= 5);
 
 procedure Switch_Lights
 with Pre =>

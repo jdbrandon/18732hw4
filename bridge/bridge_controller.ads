@@ -67,18 +67,24 @@ with Pre => (W_B /= Natural'Last),
 procedure Simple_Case;
 
 procedure Cross
-with Post =>
-  W_A = (W_A'Old - 1) xor W_B = (W_B'Old - 1);
+with Pre => 
+      (W_A /= 0) or (W_B /= 0),
+     Post =>
+      (W_A = (W_A'Old - 1)) xor (W_B = (W_B'Old - 1)) ;
 
 procedure Switch_Lights
-with Post => 
-  Light_A = Light_B'Old and
-  Light_B = Light_A'Old and
-  W_A = W_A'Old and
-  W_B = W_B'Old;
+with Pre =>
+      (Light_A /= Light_B),
+     Post => 
+       Light_A = Light_B'Old and
+       Light_B = Light_A'Old and
+       W_A = W_A'Old and
+       W_B = W_B'Old;
 
 procedure Increment_Cross_Counter
-with Post =>  (Cross_Counter = Cross_Counter'Old + 1);
+with Pre =>
+      Cross_Counter /= Natural'Last,
+     Post =>  (Cross_Counter = Cross_Counter'Old + 1);
 
 procedure Reset_Cross_Counter;
 

@@ -38,7 +38,7 @@ function Valid return Boolean is
   -- Write the condition for a valid state here.
   
   --both lights cannot be green
-  ((Light_A = GREEN xor Light_B = GREEN) or (Light_A = RED and Light_B = RED)) 
+  (not (Light_A = GREEN and Light_B = GREEN )) 
   
 );
 

@@ -42,7 +42,12 @@ function Valid return Boolean is
   
 );
 
-procedure Init;
+procedure Init
+with Post =>
+  Light_A = RED and
+  Light_B = RED and
+  W_A = 0 and
+  W_B = 0;
 
 procedure Tick
 (Next : Next_Car);

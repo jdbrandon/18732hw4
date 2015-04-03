@@ -1,0 +1,3 @@
+project Sort1 is
+  for Source_Dirs use (".");
+end Sort1;

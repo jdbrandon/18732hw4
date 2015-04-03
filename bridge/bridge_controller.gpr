@@ -1,0 +1,3 @@
+project Bridge_Controller is
+  for Source_Dirs use (".");
+end Bridge_Controller;

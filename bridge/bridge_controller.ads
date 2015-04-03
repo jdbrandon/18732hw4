@@ -57,9 +57,12 @@ with Post =>
   (W_B > 0 and W_A > 0) or
   (W_A = 0 and W_B = 0);
 
-procedure Increment_W_A;
-
-procedure Increment_W_B;
+procedure Increment_W_A
+with Pre => (W_A /= Natural'Last),
+     Post => (W_A = W_A'Old + 1);
+procedure Increment_W_B
+with Pre => (W_B /= Natural'Last),
+     Post => (W_B = W_B'Old + 1);
 
 procedure Simple_Case;
 

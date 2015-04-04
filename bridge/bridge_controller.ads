@@ -46,36 +46,49 @@ function Valid return Boolean is
    Light_B = RED and
    W_A >= 0 and
    W_B = 0 and
-   Cross_Counter < 5) or
+   Cross_Counter <= 5) or
   (Light_A = RED and
    Light_B = GREEN and
    W_A = 0 and
    W_B >= 0 and
-   Cross_Counter < 5) or
+   Cross_Counter <= 5) or
   (Light_A = GREEN and
    Light_B = RED and
-   W_A > 0 and 
+   W_A >= 0 and 
    W_B > 0 and
-   Cross_Counter < 5) or
+   Cross_Counter <= 5) or
   (Light_A = RED and 
    Light_B = GREEN and
    W_A > 0 and 
+   W_B >= 0 and
+   Cross_Counter <= 5) or
+  (Light_A = GREEN and
+   Light_B = RED and
+   W_A > 0 and
    W_B > 0 and
-   Cross_Counter < 5)
+   Cross_Counter >= 5 and
+   Just_Switched) or
+  (Light_A = RED and
+   Light_B = GREEN and
+   W_A > 0 and
+   W_B > 0 and
+   Cross_Counter >= 5 and
+   Just_Switched)  
 );
 
 procedure Init
 with Post =>
-  Light_A = RED and
-  Light_B = RED and
-  W_A = 0 and
-  W_B = 0 and
-  Cross_Counter = 0 and
+  (Light_A = RED) and
+  (Light_B = RED) and
+  (W_A = 0) and
+  (W_B = 0) and
+  (Cross_Counter = 0) and
   Valid;
 
 procedure Tick
 (Next : Next_Car)
-with Post => Valid;
+with Pre => Valid,
+     Post => Valid;
 
 procedure Increment_W_A
 with Post => 
@@ -83,8 +96,7 @@ with Post =>
        (W_A = (W_A'Old + 1))) or
       ((W_A'Old = Natural'Last) and (W_A = Natural'Last));
 procedure Increment_W_B
-with Pre => W_B < Natural'Last,
-     Post => 
+with Post => 
       ((W_B'Old < Natural'Last) and
        (W_B = (W_B'Old + 1))) or
       ((W_B'Old = Natural'Last) and (W_B = Natural'Last));
@@ -94,16 +106,22 @@ procedure Simple_Case;
 procedure Cross
 with Pre => 
       (Cross_Counter < 5) and 
-      ((W_A /= 0) or (W_B /= 0)),
+      ((W_A > 0) or (W_B > 0)) and
+      ((Light_A = GREEN) xor (Light_B = GREEN)) and 
+      Valid,
      Post =>
-      ((W_A = (W_A'Old - 1)) xor (W_B = (W_B'Old - 1))) and
       (Cross_Counter = Cross_Counter'Old + 1) and
-      (Cross_Counter <= 5);
+      (Cross_Counter <= 5) and
+      Valid;
 
 procedure Switch_Lights
 with Pre =>
-      (Light_A /= Light_B) and
-      (not Just_Switched),
+      not ((W_A > 0) xor (W_B > 0)) and
+      (W_A > 0) and
+      (W_B > 0) and
+      (Cross_Counter >= 5) and
+      not ((Light_A = RED) and (Light_B = RED)) and 
+      (Light_A /= Light_B),
      Post => 
        (Light_A = Light_B'Old) and
        (Light_B = Light_A'Old) and

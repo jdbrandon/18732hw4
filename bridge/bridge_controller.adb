@@ -152,6 +152,7 @@ procedure Switch_Lights is
 begin
   if Light_A = RED then Light_A := GREEN; else Light_A := RED; end if;
   if Light_B = RED then Light_B := GREEN; else Light_B := RED; end if;
+  Just_Switched := true;
 end Switch_Lights;
 
 
@@ -164,6 +165,7 @@ end Increment_Cross_Counter;
 procedure Reset_Cross_Counter is
 begin
   Cross_Counter := 0;
+  Just_Switched := false;
 end Reset_Cross_Counter;
 
 

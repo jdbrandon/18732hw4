@@ -28,6 +28,7 @@ Light_B: Traffic_Light;
 W_A : Natural;  -- Natural is an Integer that is >= 0
 W_B : Natural;
 Cross_Counter : Natural;
+Just_Switched : Boolean; -- True if we have just switched the traffic lights
 
 
 --------------------- Don't change the part above this line --------------------
@@ -40,27 +41,27 @@ function Valid return Boolean is
    Light_B = RED and
    W_A = 0 and 
    W_B = 0 and 
-   Cross_Count = 0) or
+   Cross_Counter = 0) or
   (Light_A = GREEN and
    Light_B = RED and
    W_A >= 0 and
    W_B = 0 and
-   Cross_Count < 5) or
+   Cross_Counter < 5) or
   (Light_A = RED and
    Light_B = GREEN and
    W_A = 0 and
    W_B >= 0 and
-   Cross_Count < 5) or
+   Cross_Counter < 5) or
   (Light_A = GREEN and
    Light_B = RED and
    W_A > 0 and 
    W_B > 0 and
-   Cross_Count < 5) or
+   Cross_Counter < 5) or
   (Light_A = RED and 
    Light_B = GREEN and
    W_A > 0 and 
    W_B > 0 and
-   Cross_Count < 5)
+   Cross_Counter < 5)
 );
 
 procedure Init
@@ -68,29 +69,32 @@ with Post =>
   Light_A = RED and
   Light_B = RED and
   W_A = 0 and
-  W_B = 0;
+  W_B = 0 and
+  Cross_Counter = 0 and
+  Valid;
 
 procedure Tick
 (Next : Next_Car)
-with Post =>
-  (W_A > 0 and W_B = 0 and Light_A = GREEN) or
-  (W_B > 0 and W_A = 0 and Light_B = GREEN) or
-  (W_B > 0 and W_A > 0 and Light_A'Old = RED and Light_B'Old = RED and Light_A = GREEN) or
-  (W_B > 0 and W_A > 0 and Light_A'Old /= Light_B'Old) or
-  (W_A = 0 and W_B = 0);
+with Post => Valid;
 
 procedure Increment_W_A
-with Pre => (W_A /= Natural'Last),
-     Post => (W_A = W_A'Old + 1);
+with Post => 
+      ((W_A'Old < Natural'Last) and 
+       (W_A = (W_A'Old + 1))) or
+      ((W_A'Old = Natural'Last) and (W_A = Natural'Last));
 procedure Increment_W_B
-with Pre => (W_B /= Natural'Last),
-     Post => (W_B = W_B'Old + 1);
+with Pre => W_B < Natural'Last,
+     Post => 
+      ((W_B'Old < Natural'Last) and
+       (W_B = (W_B'Old + 1))) or
+      ((W_B'Old = Natural'Last) and (W_B = Natural'Last));
 
 procedure Simple_Case;
 
 procedure Cross
 with Pre => 
-      (W_A /= 0) or (W_B /= 0),
+      (Cross_Counter < 5) and 
+      ((W_A /= 0) or (W_B /= 0)),
      Post =>
       ((W_A = (W_A'Old - 1)) xor (W_B = (W_B'Old - 1))) and
       (Cross_Counter = Cross_Counter'Old + 1) and
@@ -98,12 +102,14 @@ with Pre =>
 
 procedure Switch_Lights
 with Pre =>
-      (Light_A /= Light_B),
+      (Light_A /= Light_B) and
+      (not Just_Switched),
      Post => 
-       Light_A = Light_B'Old and
-       Light_B = Light_A'Old and
-       W_A = W_A'Old and
-       W_B = W_B'Old;
+       (Light_A = Light_B'Old) and
+       (Light_B = Light_A'Old) and
+       (W_A = W_A'Old) and
+       (W_B = W_B'Old) and
+       Just_Switched;
 
 procedure Increment_Cross_Counter
 with Pre =>
@@ -112,6 +118,7 @@ with Pre =>
 
 procedure Reset_Cross_Counter
 with Post =>
-      Cross_Counter = 0;
+      (Cross_Counter = 0) and 
+      (not Just_Switched);
 
 end Bridge_Controller;

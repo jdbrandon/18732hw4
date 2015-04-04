@@ -40,7 +40,8 @@ function Start_State return Boolean is
   (Light_B = RED) and
   (W_A = 0) and
   (W_B = 0) and
-  (Cross_Counter = 0))
+  (Cross_Counter = 0) and
+  (not Just_Switched))
 );
 
 function Valid return Boolean is
@@ -53,13 +54,15 @@ function Valid return Boolean is
    (Light_B = RED) and
    (W_A >= 0) and
    (W_B >= 0) and
-   Cross_Counter <= 5) or
+   (Cross_Counter <= 5) and
+   (not Just_Switched)) or
   -- Simple B
   ((Light_A = RED) and
    (Light_B = GREEN) and
    (W_A >= 0) and
-   (W_B >= 0) and
-   Cross_Counter <= 5)
+   (W_B >= 0) and 
+   (Cross_Counter <= 5) and
+   (not Just_Switched))
 );
 
 function OneGreen return Boolean is
@@ -83,14 +86,18 @@ with Post => Start_State;
 procedure Tick
 (Next : Next_Car)
 with Pre => Valid,
-     Post => Valid and not BothGreen;
+     Post => Valid;
 
 procedure Increment_W_A
-with Post =>
-      (W_A'Old <= W_A);
+with Pre => not Just_Switched,
+     Post =>
+      W_A = (if W_A'Old < Natural'Last then W_A'Old + 1 else W_A'Old) and
+      not Just_Switched;
 procedure Increment_W_B
-with Post =>
-      (W_B'Old <= W_B);
+with Pre => not Just_Switched,
+     Post =>
+      W_B = (if W_B'Old < Natural'Last then W_B'Old + 1 else W_B'Old) and
+      not Just_Switched;
 procedure Simple_Case
 with Pre => 
       ((W_A > 0) xor (W_B > 0)) and 
@@ -107,23 +114,29 @@ with Pre =>
        ((W_B > 0) and Light_B = GREEN)) and
       not BothGreen and
       Cross_Counter < 5 and
-      Valid,
+      not Just_Switched,
      Post => 
-      Valid;
+      Valid and
+      Cross_Counter <= 5 and
+      not Just_Switched;
+     -- Cross_Counter = (if Cross_Counter'Old < 5 then Cross_Counter'Old + 1 else Cross_Counter'Old);
 
 procedure Switch_Lights
-with Pre => OneGreen and not BothGreen and not Start_State,
- Post => 
+with Pre => (W_A > 0 and W_B > 0) and Cross_Counter = 5 and OneGreen and not Start_State and not Just_Switched,
+     Post => 
   Light_A = Light_B'Old and
   Light_B = Light_A'Old and
   W_A = W_A'Old and
   W_B = W_B'Old and
+  Cross_Counter = Cross_Counter'Old and
+  OneGreen and
   Just_Switched;
 
 procedure Increment_Cross_Counter
-with Pre => (Cross_Counter < 5),
+with Pre => (Cross_Counter < 5) and not Just_Switched,
      Post =>  (Cross_Counter = (Cross_Counter'Old + 1)) and
-              (Cross_Counter <= 5);
+              (Cross_Counter <= 5) and
+              not Just_Switched;
 
 procedure Reset_Cross_Counter
 with Post =>

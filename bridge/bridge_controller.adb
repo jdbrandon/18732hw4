@@ -57,7 +57,7 @@ begin
   W_A := 0;
   W_B := 0;
   Cross_Counter := 0;
-
+  Just_Switched := false;
 end Init;
 
 

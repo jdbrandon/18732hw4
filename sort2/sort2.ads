@@ -23,7 +23,9 @@ with Post =>
 (
   -- Write a condition that makes sure that any element the resulting array,
   -- did exist in the original array.
-  true
+  (for all K1 in A'First .. last =>
+    (for some K2 in A'First .. last => A(K1) = A'Old(K2) )
+  )
 );
 
 end Sort2;

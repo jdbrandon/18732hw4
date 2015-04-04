@@ -21,7 +21,7 @@ type Array_T is array (Index) of Element;
 function Invar (A : Array_T; I : Index) return Boolean is
 (
   -- Write the expression for the loop invariant here
-  true
+  ( I > A'First and (for all K in A'First .. I-2 => A(K) <= A(K+1) ) )
 );
 
 
@@ -31,7 +31,8 @@ with Post =>
 (
   -- Write the postcondition, which ensures that the resulting array
   -- is sorted in an ascending order, here.
-  true
+  ( last > A'First and (for all K in A'First .. last-1 => A(K) <= A(K+1) ) ) or
+  ( last = A'First )
 );
 
 end Sort1;

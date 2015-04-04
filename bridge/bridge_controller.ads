@@ -71,7 +71,7 @@ function Valid return Boolean is
    (Light_B = GREEN) and
    (W_A > 0) and
    (W_B >= 0) and
-   (Cross_Counter >= 5) and
+   (Cross_Counter = 5) and
    Just_Switched) or
   -- Both B
   ((Light_A = RED) and
@@ -84,7 +84,7 @@ function Valid return Boolean is
    (Light_B = RED) and
    (W_A >= 0) and
    (W_B > 0) and
-   (Cross_Counter >= 5) and
+   (Cross_Counter = 5) and
    Just_Switched)
 );
 
@@ -130,13 +130,14 @@ procedure Cross
 with Pre => 
       (((W_A > 0) and Light_A = GREEN) or
        ((W_B > 0) and Light_B = GREEN)) and
+      not BothGreen and
       Cross_Counter < 5 and
       Valid,
      Post => 
       Valid;
 
 procedure Switch_Lights
-with Pre => OneGreen,
+with Pre => OneGreen and not BothGreen,
  Post => 
   Light_A = Light_B'Old and
   Light_B = Light_A'Old and
@@ -150,7 +151,7 @@ with Pre => (Cross_Counter < 5),
 
 procedure Reset_Cross_Counter
 with Post =>
-      Cross_Counter < 5 and
+      Cross_Counter = 0 and
       not Just_Switched;
 
 end Bridge_Controller;

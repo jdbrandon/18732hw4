@@ -40,7 +40,7 @@ function Start_State return Boolean is
   (Light_B = RED) and
   (W_A = 0) and
   (W_B = 0) and
-  (Cross_Counter < 5))
+  (Cross_Counter = 0))
 );
 
 function Valid return Boolean is
@@ -52,40 +52,14 @@ function Valid return Boolean is
   ((Light_A = GREEN) and
    (Light_B = RED) and
    (W_A >= 0) and
-   (W_B = 0) and
+   (W_B >= 0) and
    Cross_Counter <= 5) or
   -- Simple B
   ((Light_A = RED) and
    (Light_B = GREEN) and
-   (W_A = 0) and
-   (W_B >= 0) and
-   Cross_Counter <= 5) or
-  -- Both A
-  ((Light_A = GREEN) and
-   (Light_B = RED) and
    (W_A >= 0) and
    (W_B >= 0) and
-   Cross_Counter <= 5) or
-  -- A Switch B
-  ((Light_A = RED) and
-   (Light_B = GREEN) and
-   (W_A > 0) and
-   (W_B >= 0) and
-   (Cross_Counter = 5) and
-   Just_Switched) or
-  -- Both B
-  ((Light_A = RED) and
-   (Light_B = GREEN) and
-   (W_A >= 0) and
-   (W_B >= 0) and
-   Cross_Counter <= 5) or
-  -- B Switch A
-  ((Light_A = GREEN) and
-   (Light_B = RED) and
-   (W_A >= 0) and
-   (W_B > 0) and
-   (Cross_Counter = 5) and
-   Just_Switched)
+   Cross_Counter <= 5)
 );
 
 function OneGreen return Boolean is
@@ -123,6 +97,7 @@ with Pre =>
       (OneGreen or Both_Red),
      Post =>
       (Cross_Counter <= 5) and 
+      not Just_Switched and 
       OneGreen and
       Valid;
 
@@ -137,7 +112,7 @@ with Pre =>
       Valid;
 
 procedure Switch_Lights
-with Pre => OneGreen and not BothGreen,
+with Pre => OneGreen and not BothGreen and not Start_State,
  Post => 
   Light_A = Light_B'Old and
   Light_B = Light_A'Old and
@@ -147,7 +122,8 @@ with Pre => OneGreen and not BothGreen,
 
 procedure Increment_Cross_Counter
 with Pre => (Cross_Counter < 5),
-     Post =>  (Cross_Counter = (Cross_Counter'Old + 1));
+     Post =>  (Cross_Counter = (Cross_Counter'Old + 1)) and
+              (Cross_Counter <= 5);
 
 procedure Reset_Cross_Counter
 with Post =>

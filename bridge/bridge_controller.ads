@@ -68,9 +68,9 @@ function Valid return Boolean is
    Cross_Counter <= 5) or
   -- A Switch B
   ((Light_A = RED) and
-   (Light_B = GREEN) and 
+   (Light_B = GREEN) and
    (W_A > 0) and
-   (W_B > 0) and 
+   (W_B >= 0) and
    (Cross_Counter >= 5) and
    Just_Switched) or
   -- Both B
@@ -82,7 +82,7 @@ function Valid return Boolean is
   -- B Switch A
   ((Light_A = GREEN) and
    (Light_B = RED) and
-   (W_A > 0) and
+   (W_A >= 0) and
    (W_B > 0) and
    (Cross_Counter >= 5) and
    Just_Switched)
@@ -91,6 +91,11 @@ function Valid return Boolean is
 function OneGreen return Boolean is
 (
   (Light_A = GREEN) xor (Light_B = GREEN)
+);
+
+function BothGreen return Boolean is 
+( 
+  (Light_A = GREEN) and  (Light_B = GREEN)
 );
 
 function Both_Red return Boolean is 
@@ -104,7 +109,7 @@ with Post => Start_State;
 procedure Tick
 (Next : Next_Car)
 with Pre => Valid,
-     Post => Valid;
+     Post => Valid and not BothGreen;
 
 procedure Increment_W_A
 with Post =>
@@ -123,10 +128,11 @@ with Pre =>
 
 procedure Cross
 with Pre => 
+      (((W_A > 0) and Light_A = GREEN) or
+       ((W_B > 0) and Light_B = GREEN)) and
       Cross_Counter < 5 and
       Valid,
      Post => 
-      Cross_Counter <= 5 and
       Valid;
 
 procedure Switch_Lights
@@ -140,8 +146,7 @@ with Pre => OneGreen,
 
 procedure Increment_Cross_Counter
 with Pre => (Cross_Counter < 5),
-     Post =>  (Cross_Counter = Cross_Counter'Old + 1) and
-              (Cross_Counter <= 5);
+     Post =>  (Cross_Counter = (Cross_Counter'Old + 1));
 
 procedure Reset_Cross_Counter
 with Post =>

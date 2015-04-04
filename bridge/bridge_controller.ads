@@ -35,11 +35,32 @@ Cross_Counter : Natural;
 
 function Valid return Boolean is
 (
-  -- Write the condition for a valid state here.
-  
-  --both lights cannot be green
-  (not (Light_A = GREEN and Light_B = GREEN )) 
-  
+  -- Write the condition for a valid state here. 
+  (Light_A = RED and
+   Light_B = RED and
+   W_A = 0 and 
+   W_B = 0 and 
+   Cross_Count = 0) or
+  (Light_A = GREEN and
+   Light_B = RED and
+   W_A >= 0 and
+   W_B = 0 and
+   Cross_Count < 5) or
+  (Light_A = RED and
+   Light_B = GREEN and
+   W_A = 0 and
+   W_B >= 0 and
+   Cross_Count < 5) or
+  (Light_A = GREEN and
+   Light_B = RED and
+   W_A > 0 and 
+   W_B > 0 and
+   Cross_Count < 5) or
+  (Light_A = RED and 
+   Light_B = GREEN and
+   W_A > 0 and 
+   W_B > 0 and
+   Cross_Count < 5)
 );
 
 procedure Init

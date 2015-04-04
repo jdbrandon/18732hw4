@@ -33,57 +33,73 @@ Just_Switched : Boolean; -- True if we have just switched the traffic lights
 
 --------------------- Don't change the part above this line --------------------
 
-
-function Valid return Boolean is
+function Start_State return Boolean is
 (
-  -- Write the condition for a valid state here. 
-  (Light_A = RED and
-   Light_B = RED and
-   W_A = 0 and 
-   W_B = 0 and 
-   Cross_Counter = 0) or
-  (Light_A = GREEN and
-   Light_B = RED and
-   W_A >= 0 and
-   W_B = 0 and
-   Cross_Counter <= 5) or
-  (Light_A = RED and
-   Light_B = GREEN and
-   W_A = 0 and
-   W_B >= 0 and
-   Cross_Counter <= 5) or
-  (Light_A = GREEN and
-   Light_B = RED and
-   W_A >= 0 and 
-   W_B > 0 and
-   Cross_Counter <= 5) or
-  (Light_A = RED and 
-   Light_B = GREEN and
-   W_A > 0 and 
-   W_B >= 0 and
-   Cross_Counter <= 5) or
-  (Light_A = GREEN and
-   Light_B = RED and
-   W_A > 0 and
-   W_B > 0 and
-   Cross_Counter >= 5 and
-   Just_Switched) or
-  (Light_A = RED and
-   Light_B = GREEN and
-   W_A > 0 and
-   W_B > 0 and
-   Cross_Counter >= 5 and
-   Just_Switched)  
-);
-
-procedure Init
-with Post =>
-  (Light_A = RED) and
+  -- Start State
+  ((Light_A = RED) and 
   (Light_B = RED) and
   (W_A = 0) and
   (W_B = 0) and
-  (Cross_Counter = 0) and
-  Valid;
+  (Cross_Counter < 5))
+);
+
+function Valid return Boolean is
+(
+  -- Write the condition for a valid state here.
+
+  Start_State or
+  -- Simple A
+  ((Light_A = GREEN) and
+   (Light_B = RED) and
+   (W_A >= 0) and
+   (W_B = 0) and
+   Cross_Counter <= 5) or
+  -- Simple B
+  ((Light_A = RED) and
+   (Light_B = GREEN) and
+   (W_A = 0) and
+   (W_B >= 0) and
+   Cross_Counter <= 5) or
+  -- Both A
+  ((Light_A = GREEN) and
+   (Light_B = RED) and
+   (W_A >= 0) and
+   (W_B >= 0) and
+   Cross_Counter <= 5) or
+  -- A Switch B
+  ((Light_A = RED) and
+   (Light_B = GREEN) and 
+   (W_A > 0) and
+   (W_B > 0) and 
+   (Cross_Counter >= 5) and
+   Just_Switched) or
+  -- Both B
+  ((Light_A = RED) and
+   (Light_B = GREEN) and
+   (W_A >= 0) and
+   (W_B >= 0) and
+   Cross_Counter <= 5) or
+  -- B Switch A
+  ((Light_A = GREEN) and
+   (Light_B = RED) and
+   (W_A > 0) and
+   (W_B > 0) and
+   (Cross_Counter >= 5) and
+   Just_Switched)
+);
+
+function OneGreen return Boolean is
+(
+  (Light_A = GREEN) xor (Light_B = GREEN)
+);
+
+function Both_Red return Boolean is 
+( 
+  (Light_A = RED) and  (Light_B = RED)
+);
+
+procedure Init
+with Post => Start_State;
 
 procedure Tick
 (Next : Next_Car)
@@ -91,52 +107,45 @@ with Pre => Valid,
      Post => Valid;
 
 procedure Increment_W_A
-with Post => 
-      ((W_A'Old < Natural'Last) and 
-       (W_A = (W_A'Old + 1))) or
-      ((W_A'Old = Natural'Last) and (W_A = Natural'Last));
+with Post =>
+      (W_A'Old <= W_A);
 procedure Increment_W_B
-with Post => 
-      ((W_B'Old < Natural'Last) and
-       (W_B = (W_B'Old + 1))) or
-      ((W_B'Old = Natural'Last) and (W_B = Natural'Last));
-
-procedure Simple_Case;
+with Post =>
+      (W_B'Old <= W_B);
+procedure Simple_Case
+with Pre => 
+      ((W_A > 0) xor (W_B > 0)) and 
+      (OneGreen or Both_Red),
+     Post =>
+      (Cross_Counter <= 5) and 
+      OneGreen and
+      Valid;
 
 procedure Cross
 with Pre => 
-      (Cross_Counter < 5) and 
-      ((W_A > 0) or (W_B > 0)) and
-      ((Light_A = GREEN) xor (Light_B = GREEN)) and 
+      Cross_Counter < 5 and
       Valid,
-     Post =>
-      (Cross_Counter = Cross_Counter'Old + 1) and
-      (Cross_Counter <= 5) and
+     Post => 
+      Cross_Counter <= 5 and
       Valid;
 
 procedure Switch_Lights
-with Pre =>
-      not ((W_A > 0) xor (W_B > 0)) and
-      (W_A > 0) and
-      (W_B > 0) and
-      (Cross_Counter >= 5) and
-      not ((Light_A = RED) and (Light_B = RED)) and 
-      (Light_A /= Light_B),
-     Post => 
-       (Light_A = Light_B'Old) and
-       (Light_B = Light_A'Old) and
-       (W_A = W_A'Old) and
-       (W_B = W_B'Old) and
-       Just_Switched;
+with Pre => OneGreen,
+ Post => 
+  Light_A = Light_B'Old and
+  Light_B = Light_A'Old and
+  W_A = W_A'Old and
+  W_B = W_B'Old and
+  Just_Switched;
 
 procedure Increment_Cross_Counter
-with Pre =>
-      Cross_Counter /= Natural'Last,
-     Post =>  (Cross_Counter = Cross_Counter'Old + 1);
+with Pre => (Cross_Counter < 5),
+     Post =>  (Cross_Counter = Cross_Counter'Old + 1) and
+              (Cross_Counter <= 5);
 
 procedure Reset_Cross_Counter
 with Post =>
-      (Cross_Counter = 0) and 
-      (not Just_Switched);
+      Cross_Counter < 5 and
+      not Just_Switched;
 
 end Bridge_Controller;

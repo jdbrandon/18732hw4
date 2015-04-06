@@ -62,7 +62,21 @@ function Valid return Boolean is
    (W_A >= 0) and
    (W_B >= 0) and 
    (Cross_Counter <= 5) and
-   (not Just_Switched))
+   (not Just_Switched)) or
+  -- Switch A
+  ((Light_A = RED) and
+   (Light_B = GREEN) and
+   (W_A > 0) and
+   (W_B > 0) and 
+   (Cross_Counter = 5) and
+   Just_Switched) or
+  -- Switch B
+  ((Light_A = GREEN) and
+   (Light_B = RED) and
+   (W_A > 0) and
+   (W_B > 0) and 
+   (Cross_Counter = 5) and
+   Just_Switched)
 );
 
 function OneGreen return Boolean is
@@ -89,15 +103,11 @@ with Pre => Valid,
      Post => Valid;
 
 procedure Increment_W_A
-with Pre => not Just_Switched,
-     Post =>
-      W_A = (if W_A'Old < Natural'Last then W_A'Old + 1 else W_A'Old) and
-      not Just_Switched;
+with Post =>
+      W_A = (if W_A'Old < Natural'Last then W_A'Old + 1 else W_A'Old);
 procedure Increment_W_B
-with Pre => not Just_Switched,
-     Post =>
-      W_B = (if W_B'Old < Natural'Last then W_B'Old + 1 else W_B'Old) and
-      not Just_Switched;
+with Post =>
+      W_B = (if W_B'Old < Natural'Last then W_B'Old + 1 else W_B'Old);
 procedure Simple_Case
 with Pre => 
       ((W_A > 0) xor (W_B > 0)) and 
@@ -122,7 +132,7 @@ with Pre =>
      -- Cross_Counter = (if Cross_Counter'Old < 5 then Cross_Counter'Old + 1 else Cross_Counter'Old);
 
 procedure Switch_Lights
-with Pre => (W_A > 0 and W_B > 0) and Cross_Counter = 5 and OneGreen and not Start_State and not Just_Switched,
+with Pre => (W_A > 0 and W_B > 0) and Cross_Counter = 5 and OneGreen and not Start_State,
      Post => 
   Light_A = Light_B'Old and
   Light_B = Light_A'Old and
@@ -130,7 +140,8 @@ with Pre => (W_A > 0 and W_B > 0) and Cross_Counter = 5 and OneGreen and not Sta
   W_B = W_B'Old and
   Cross_Counter = Cross_Counter'Old and
   OneGreen and
-  Just_Switched;
+  Just_Switched and 
+  Valid;
 
 procedure Increment_Cross_Counter
 with Pre => (Cross_Counter < 5) and not Just_Switched,

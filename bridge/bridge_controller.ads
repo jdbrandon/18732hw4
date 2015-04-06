@@ -139,7 +139,9 @@ with Pre => (Cross_Counter < 5) and not Just_Switched,
               not Just_Switched;
 
 procedure Reset_Cross_Counter
-with Post =>
+with Pre =>
+      Just_Switched or (W_A = 0 xor W_B = 0),
+     Post =>
       Cross_Counter = 0 and
       not Just_Switched;
 
